@@ -18,11 +18,14 @@
 ###############################################################################
 
 
-import torch
 import numpy as np
+import torch
+import math
+import random
 
-from utils import common
 from modules.policy.rl.common import DEVICE
+from modules.policy.rl.binary_heap import BinaryHeap
+from utils import common
 
 class Buffer(object):
     """ Base class for experience replay buffers
@@ -64,7 +67,6 @@ class Buffer(object):
         self.last_state = None
         self.last_action = None
         self.last_reward = None
-
         self.episode_length = 0
 
 
@@ -213,7 +215,7 @@ class NaivePrioritizedBuffer(Buffer):
     def __init__(self, buffer_size: int, batch_size: int, state_dim: int, 
                  sample_last_transition: bool = False,
                  regularisation: float = 0.00001, exponent: float = 0.6, beta: float = 0.4,
-                 discount_gamma: float = 0.99):
+                 beta_frames=100000, discount_gamma: float = 0.99):
         super(NaivePrioritizedBuffer, self).__init__(buffer_size, batch_size, state_dim,
                                                      discount_gamma=discount_gamma)
         print("  REPLAY MEMORY: NAIVE Prioritized")
@@ -222,11 +224,10 @@ class NaivePrioritizedBuffer(Buffer):
         self.regularisation = regularisation
         self.exponent = exponent
         self.beta = beta
+        self.beta_frames = beta_frames
+        self.beta_grad = (1 - self.beta) / self.beta_frames  # anneal beta over time
         self.max_p = 1.0
         self.sample_last_transition = sample_last_transition
-        # TODO anneal beta over time (see paper prioritized experience replay)
-        # note: did not make a significant difference with the tested parameters
-        # - is it worth to re-implement that feature?
 
     def _priority_to_probability(self, priority: float):
         """ Convert priority number to probability space (inside [0,1]) """
@@ -272,7 +273,6 @@ class NaivePrioritizedBuffer(Buffer):
         batch_write_pos = 0
         data_indices = torch.empty(self.batch_size, dtype=torch.long, device=DEVICE)
         probabilities = torch.empty(self.batch_size, dtype=torch.float, device=DEVICE)
-        indices = []
 
         self.sample_last_transition = True
         p_normed = np.array(self.probs[:self.buffer_count]) / np.linalg.norm(
@@ -308,3 +308,63 @@ class NaivePrioritizedBuffer(Buffer):
 
         return s_batch, a_batch, r_batch, s2_batch, t_batch, data_indices, \
                importance_weights.view(-1, 1)
+
+
+class RankPrioritizedBuffer(Buffer):
+    def __init__(self, buffer_size, batch_size, state_dim, discount_gamma=0.99):
+        super(RankPrioritizedBuffer, self).__init__(buffer_size, batch_size, state_dim,
+                                                    discount_gamma=discount_gamma)
+        print("  REPLAY MEMORY: RANK Prioritized")
+        self.exponent = 0.6
+        self.beta = 0.4
+        self.memory_size = buffer_size
+        self.n_partitions = 400  # partition number n, split memory size to n part
+        self.priority_queue = BinaryHeap(self.buffer_size, self.batch_size, self.n_partitions, self.exponent)
+
+    def store(self, state, action, reward, terminal=False):
+        if super(RankPrioritizedBuffer, self).store(state, action, reward, terminal=terminal):
+            # add experience to the priority queue at the same time
+            if not isinstance(self.last_state, type(None)):
+                #rebalance binary heap whenever the memory buffer is full
+                if self.write_pos < self.last_write_pos:
+                    self.priority_queue.rebalance()
+                # new experience always get the maximum priority
+                priority = self.priority_queue.get_max_priority()
+                self.priority_queue.update(priority, self.last_write_pos)
+
+    def sample(self):
+        dist_index = int(math.floor(len(self)/ self.memory_size * self.n_partitions))
+        distribution = self.priority_queue.distributions[dist_index]
+        data_indices = torch.empty(self.batch_size, dtype=torch.long,
+                                    device=DEVICE)
+        probabilities = torch.empty(self.batch_size, dtype=torch.float,
+                                    device=DEVICE)
+        rank_indices = []
+
+        for x in distribution["ranges"]:
+            sampled_object = random.sample(range(x[0],x[-1]+1), 1)
+            rank_indices.append(sampled_object[0])
+        e_id = self.priority_queue.get_experience_id(rank_indices)
+        #print(e_id)
+
+        for i in range(self.batch_size):
+            data_indices[i] = int(e_id[i])
+            probabilities[i] = distribution['pmf'][rank_indices[i]-1]
+
+        # assemble batch from data indices
+        s_batch = self.mem_state.index_select(0, data_indices)
+        a_batch = self.mem_action.index_select(0, data_indices)
+        r_batch = self.mem_reward.index_select(0, data_indices)
+        t_batch = self.mem_terminal.index_select(0, data_indices)
+        s2_batch = self.mem_next_state.index_select(0, data_indices)
+
+        # calculate importance sampling weights
+        # w = (P(i) * N) ^ (-beta) / max w
+        importance_weights = float(len(self)) * probabilities
+        importance_weights = importance_weights.pow(-self.beta)
+        importance_weights = importance_weights / importance_weights.max(dim=0)[0].item()
+
+        return s_batch, a_batch, r_batch, s2_batch, t_batch, data_indices, importance_weights.view(-1, 1)
+
+    def update(self, e_id, td_error):
+        self.priority_queue.update(abs(td_error), e_id)

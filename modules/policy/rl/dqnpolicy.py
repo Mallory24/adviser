@@ -28,7 +28,7 @@ from tensorboardX import SummaryWriter
 from utils.domain.jsonlookupdomain import JSONLookupDomain
 from modules.policy.policy_rl import RLPolicy
 from modules.policy.rl.common import DEVICE
-from modules.policy.rl.experience_buffer import Buffer, NaivePrioritizedBuffer
+from modules.policy.rl.experience_buffer import Buffer, RankPrioritizedBuffer
 from modules.policy.rl.dqn import DQN, DuelingDQN, NetArchitecture
 from utils.useract import UserActionType, UserAct
 from utils.sysact import SysAct, SysActionType
@@ -49,8 +49,8 @@ class DQNPolicy(RLPolicy):
                  advantage_layer_sizes: List[int] = [400, 400],  # dueling architecture
                  lr: float = 0.0001, discount_gamma: float = 0.99,
                  target_update_rate: int = 3,
-                 replay_buffer_size: int = 8192, batch_size: int = 64,
-                 buffer_cls: Type[Buffer] = NaivePrioritizedBuffer,
+                 replay_buffer_size: int = 20000, batch_size: int = 32,
+                 buffer_cls: Type[Buffer] = RankPrioritizedBuffer,
                  eps_start: float = 0.3, eps_end: float = 0.0,
                  l2_regularisation: float = 0.0, gradient_clipping: float = 5.0,
                  p_dropout: float = 0.0, training_frequency: int = 2, train_dialogs: int = 1000,
@@ -189,6 +189,7 @@ class DQNPolicy(RLPolicy):
             Q-values for selected actions
         """
         q_values = self.model(state)
+        #print(action)
         return q_values.gather(1, action)
 
 
@@ -268,7 +269,7 @@ class DQNPolicy(RLPolicy):
         if not self.is_training:
             return
 
-        if len(self.buffer) >= self.batch_size * 10 and \
+        if len(self.buffer) > self.batch_size * 12.5 and \
                 self.total_train_dialogs % self.training_frequency == 0:
             self.train_call_count += 1
 
