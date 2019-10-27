@@ -34,7 +34,7 @@ def get_root_dir():
 sys.path.append(get_root_dir())
 
 
-from modules.policy.rl.experience_buffer import UniformBuffer, NaivePrioritizedBuffer
+from modules.policy.rl.experience_buffer import UniformBuffer, NaivePrioritizedBuffer, RankPrioritizedBuffer
 
 from dialogsystem import DialogSystem
 from modules.bst import HandcraftedBST
@@ -61,6 +61,8 @@ def train(domain_name: str, log_to_file: bool, seed: int, train_epochs: int, tra
         buffer_cls = NaivePrioritizedBuffer
     elif buffer_classname == "uniform":
         buffer_cls = UniformBuffer
+    elif buffer_classname == "rank-prioritized":
+        buffer_cls = RankPrioritizedBuffer
 
     domain = JSONLookupDomain(name=domain_name)
     bst = HandcraftedBST(domain=domain, logger=logger)
@@ -136,7 +138,7 @@ if __name__ == "__main__":
     parser.add_argument("-cg", "--clipgrad", type=float, default=0.0,
                         help="upper bound gradient is going to be clipped to")
 
-    parser.add_argument("-bn", "--buffername", choices=['uniform', 'prioritized'],
+    parser.add_argument("-bn", "--buffername", choices=['uniform', 'prioritized', 'rank-prioritized'],
                         help="experience replay buffer type", default='prioritized')
     parser.add_argument("-bs", "--buffersize", type=int, default=8192,
                         help="capacity of experience replay buffer")
