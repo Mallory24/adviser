@@ -1,15 +1,11 @@
 Implementation of Rank-based PER on ADvISER.
-ADvISER is developed by 
+ADvISER is a dialog system flexible framework.
+
+
+Reference
 
 <cite>
-@InProceedings{adviser19,
-title =     {ADVISER: A Dialog System Framework for Education & Research},
-author =    {Daniel Ortega and Dirk V{\"{a}}th and Gianna Weber and Lindsey Vanderlyn and Maximilian Schmidt and Moritz V{\"{o}}lkel and Zorica Karacevic and Ngoc Thang Vu},
-booktitle = {Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics (ACL 2019) - System Demonstrations},
-publisher = {Association for Computational Linguistics},
-location =  {Florence, Italy},
-year =      {2019}
-}
+Ortega, D., Väth, D., Weber, G., Vanderlyn, L., Schmidt, M., Völkel, M., … Vu, N. T. (2019). ADVISER: A Dialog System Framework for Education & Research. Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics: System Demonstrations. doi: 10.18653/v1/p19-3016
 </cite>
 
 
