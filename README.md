@@ -69,29 +69,7 @@ and execute
 6. Select a language by entering `english` or `german`, then chat with ADvISER. To end your
 conversation, type `bye`.
 
-Support
-=======
-You can ask questions by sending emails to adviser-support@ims.uni-stuttgart.de
 
-You can also post bug reports and feature requests (only) in GitHub issues. Make sure to read our guidelines first.
-
-.. _home:how_to_cite:
-
-How to cite
+Reference
 ===========
-If you use or reimplement any of this source code, please cite the following paper:
-
-.. code-block:: bibtex
-
-   @InProceedings{adviser19,
-   title =     {ADVISER: A Dialog System Framework for Education & Research},
-   author =    {Daniel Ortega and Dirk V{\"{a}}th and Gianna Weber and Lindsey Vanderlyn and Maximilian Schmidt and Moritz V{\"{o}}lkel and Zorica Karacevic and Ngoc Thang Vu},
-   booktitle = {Proceedings of the 57th Annual Meeting of the Association for Computational Linguistics (ACL 2019) - System Demonstrations},
-   publisher = {Association for Computational Linguistics},
-   location =  {Florence, Italy},
-   year =      {2019}
-   }
-
-License
-=======
-Adviser is published under the GNU GPL 3 license.
+![ref]()
