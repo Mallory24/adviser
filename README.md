@@ -72,4 +72,4 @@ conversation, type `bye`.
 
 Reference
 ===========
-![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png =100x20)
+![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png)
