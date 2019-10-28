@@ -1,7 +1,7 @@
 Implemenation of Rank-based PER on ADvISER.    
 
 ADvISER is a flexible dialog framework for research and education.[1]   
-Please see their `documentation <https://digitalphonetics.github.io/adviser/>`_ for more details.  
+Please see their [documentation](https://digitalphonetics.github.io/adviser/) for more details.  
 
 Implementation
 ============
