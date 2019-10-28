@@ -1,3 +1,5 @@
+Implemenation of Rank-based PER on ADvISER.
+ADvISER is a flexible dialog framework for research and education.[1] 
 Please see the `documentation <https://digitalphonetics.github.io/adviser/>`_ for more details.
 
 Installation
@@ -72,4 +74,4 @@ conversation, type `bye`.
 
 Reference
 ===========
-![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png)
+[1]![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png)
