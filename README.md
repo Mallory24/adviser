@@ -1,35 +1,38 @@
-Implemenation of Rank-based PER on ADvISER.  
+Implemenation of Rank-based PER on ADvISER.    
+
 ADvISER is a flexible dialog framework for research and education.[1]   
 Please see their `documentation <https://digitalphonetics.github.io/adviser/>`_ for more details.  
 
-Installation
+Implementation
 ============
 
-Downloading the code
+Add Rank-based Experience Replay Buffer
 --------------------
 
-If you are not familiar with `Git`, just download the zip file available in the ``Clone or Download``. Then unzip and enter the main folder.
+Rank-based experience replay is a prioritized method to make agent learn faster.    
+To efficiently sample and update priority in the buffer, a binary heap structure is used.  
 
 
-Cloning the repository
+Train & Test 
 -----------------------
 
-If you feel comfortable with `Git`, you may instead clone the repository.
-
-.. code-block:: bash
-
-    git clone https://github.com/DigitalPhonetics/adviser.git
+Use integration tests to simulate user's behavior for trainning and evaluation.  
+Trainning is performed with the initialization of 10 random seeds, 10 epochs and 1000 episodes.  
+Evaluation is done after 10 trainning epochs, and is averaged with 500 episodes.   
 
 
-Install requirements with pip
+Result
 ------------------------------
 
-ADvISER needs to be executed in a Python3 environment.
+To evaluate agent's performance, 3 metrics are used:
+1. Average Turns  
+2. Average Success Rate 
+3. Average Rewards (maximum = 20)
 
-Once you have the code locally navigate to the top level directory, where you will find the file
-`requirements.txt`, which lists all modules you need to run ADvISER. We suggest to create a
-virtual environment from the top level directory, as shown below, followed by installing the necessary packages.
-
+![train_rewards](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/tests/integrationtests/logs/train_rewards.png)
+![eval_turns](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/tests/integrationtests/logs/eval_turns.png)
+![eval_success](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/tests/integrationtests/logs/eval_success.png)
+![eval_rewards](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/tests/integrationtests/logs/eval_rewards.png)
 
 1. Make sure you have virtualenv installed by executing
 
@@ -74,4 +77,4 @@ conversation, type `bye`.
 
 Reference
 ===========
-[1]![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png)
+![ref](https://github.com/Mallory24/adviser/blob/rank-based-PER-DQN/docs/ref.png) [1]
